@@ -42,6 +42,7 @@ class Kohana_Email {
 		// Extract configured options
 		extract($config, EXTR_SKIP);
 
+		// Use the SMTP transport
 		if ($driver === 'smtp')
 		{
 			// Create SMTP transport
@@ -77,6 +78,8 @@ class Kohana_Email {
 				$transport->setTimeout($options['timeout']);
 			}
 		}
+
+		// Use the sendmail transport
 		elseif ($driver === 'sendmail')
 		{
 			// Create sendmail transport
@@ -88,6 +91,8 @@ class Kohana_Email {
 				$transport->setCommand($options['command']);
 			}
 		}
+
+		// Use native PHP mail transport
 		else
 		{
 			// Create native transport
@@ -122,6 +127,7 @@ class Kohana_Email {
 		// Extract configured options
 		extract($config, EXTR_SKIP);
 
+		// Use the file spooler driver
 		if ($spool_driver === 'file')
 		{
 			if ( ! is_writable($spool_options))
@@ -131,10 +137,14 @@ class Kohana_Email {
 
 			$spooler = new Email_Spool_File($spool_options);
 		}
+
+		// Use the database spooler object
 		elseif ($spool_driver === 'database')
 		{
 			$spooler = new Email_Spool_Database($spool_options);
 		}
+
+		// Do not use a spooler
 		else
 		{
 			$spooler = FALSE;
