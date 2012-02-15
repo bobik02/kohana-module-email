@@ -62,14 +62,6 @@ class Kohana_Email_Spool_Database extends Swift_ConfigurableSpool {
 	 */
 	public function flushQueue(Swift_Transport $transport, & $failed_recipients = NULL)
 	{
-		// Connect with the transport service
-		if ( ! $transport->isStarted())
-		{
-			$transport->start();
-		}
-
-		$time = time();
-
 		// Keep a count of how many messages were sent
 		$count = 0;
 
@@ -84,22 +76,36 @@ class Kohana_Email_Spool_Database extends Swift_ConfigurableSpool {
 			$query->limit($this->getMessageLimit());
 		}
 
-		foreach ($query->execute() as $email_message)
+		$messages = $query->execute();
+
+		// Check that there are emails to be sent
+		if(count($messages) > 0)
 		{
-			// Get the deserialized message
-			$message = unserialize($email_message['message']);
+			// Connect with the transport service
+			if ( ! $transport->isStarted())
+			{
+				$transport->start();
+			}
 
-			// Send the message
-			$count += $transport->send($message, $failed_recipients);
+			$time = time();
 
-			// Delete the send email from the table
-			DB::Delete($this->_table_name)
-				->where('id', '=', $email_message['id'])
-				->execute();
+			foreach ($messages as $email_message)
+			{
+				// Get the deserialized message
+				$message = unserialize($email_message['message']);
 
-			// Make sure we haven't reached the time limit
-			if ($this->getTimeLimit() AND (time() - $time) >= $this->getTimeLimit())
-				break;
+				// Send the message
+				$count += $transport->send($message, $failed_recipients);
+
+				// Delete the send email from the table
+				DB::Delete($this->_table_name)
+					->where('id', '=', $email_message['id'])
+					->execute();
+
+				// Make sure we haven't reached the time limit
+				if ($this->getTimeLimit() AND (time() - $time) >= $this->getTimeLimit())
+					break;
+			}
 		}
 
 		return $count;
