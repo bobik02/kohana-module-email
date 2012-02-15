@@ -47,7 +47,10 @@ class Kohana_Email_Spool_Database extends Swift_ConfigurableSpool {
 	 */
 	public function queueMessage(Swift_Mime_Message $message)
 	{
-
+		// Insert the message into the table
+		DB::Insert($this->_table_name, array('message'))
+			->values(array(serialize($message)))
+			->execute();
 	}
 
 	/**
@@ -64,6 +67,8 @@ class Kohana_Email_Spool_Database extends Swift_ConfigurableSpool {
 		{
 			$transport->start();
 		}
+
+
 
 		var_dump($transport);
 	}
