@@ -19,6 +19,11 @@ class Kohana_Email {
 	public static $_mailer;
 
 	/**
+	 * @var  object  SwiftMailer spool object instance
+	 */
+	public static $_spooler;
+
+	/**
 	 * Creates a SwiftMailer instance.
 	 *
 	 * @return  object  Swift object
@@ -97,6 +102,46 @@ class Kohana_Email {
 
 		// Create the SwiftMailer instance
 		return Email::$_mailer = Swift_Mailer::newInstance($transport);
+	}
+
+	/**
+	 * Create a Swift Spooler instance
+	 *
+	 * @return  object  Instance of a SwiftMailer spooler
+	 */
+	public static function spooler()
+	{
+		if (Email::$_spooler)
+		{
+			return Email::$_spooler;
+		}
+
+		// Load email configuration, get only the required options
+		$config = Arr::extract(Kohana::$config->load('email')->as_array(),
+			array('spool_driver', 'spool_options'));
+
+		// Extract configured options
+		extract($config, EXTR_SKIP);
+
+		if ($spool_driver === 'file')
+		{
+			if ( ! is_writable($spool_options))
+			{
+				throw new Kohana_Exception("The file email spooling path must be writable");
+			}
+
+			$spooler = new Email_Spool_File($spool_options);
+		}
+		elseif ($spool_driver === 'database')
+		{
+			$spooler = new Email_Spool_Database($spool_options);
+		}
+		else
+		{
+			$spooler = FALSE;
+		}
+
+		return Email::$_spooler = $spooler;
 	}
 
 	/**
