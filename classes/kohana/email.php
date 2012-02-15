@@ -14,7 +14,7 @@ class Kohana_Email {
 	const VERSION = '1.0.0';
 
 	/**
-	 * @var  object  Swiftmailer instance
+	 * @var  object  SwiftMailer instance
 	 */
 	public static $_mailer;
 
@@ -25,80 +25,78 @@ class Kohana_Email {
 	 */
 	public static function mailer()
 	{
-		if ( ! Email::$_mailer)
+		if (Email::$_mailer)
 		{
-			// Load email configuration, make sure minimum defaults are set
-			$config = Kohana::$config->load('email')->as_array() + array(
-				'driver'  => 'native',
-				'options' => array(),
-			);
-
-			// Extract configured options
-			extract($config, EXTR_SKIP);
-
-			if ($driver === 'smtp')
-			{
-				// Create SMTP transport
-				$transport = Swift_SmtpTransport::newInstance($options['hostname']);
-
-				if (isset($options['port']))
-				{
-					// Set custom port number
-					$transport->setPort($options['port']);
-				}
-
-				if (isset($options['encryption']))
-				{
-					// Set encryption
-					$transport->setEncryption($options['encryption']);
-				}
-
-				if (isset($options['username']))
-				{
-					// Require authentication, username
-					$transport->setUsername($options['username']);
-				}
-
-				if (isset($options['password']))
-				{
-					// Require authentication, password
-					$transport->setPassword($options['password']);
-				}
-
-				if (isset($options['timeout']))
-				{
-					// Use custom timeout setting
-					$transport->setTimeout($options['timeout']);
-				}
-			}
-			elseif ($driver === 'sendmail')
-			{
-				// Create sendmail transport
-				$transport = Swift_SendmailTransport::newInstance();
-
-				if (isset($options['command']))
-				{
-					// Use custom sendmail command
-					$transport->setCommand($options['command']);
-				}
-			}
-			else
-			{
-				// Create native transport
-				$transport = Swift_MailTransport::newInstance();
-
-				if (isset($options['params']))
-				{
-					// Set extra parameters for mail()
-					$transport->setExtraParams($options['params']);
-				}
-			}
-
-			// Create the SwiftMailer instance
-			Email::$_mailer = Swift_Mailer::newInstance($transport);
+			return Email::$_mailer;
 		}
 
-		return Email::$_mailer;
+		// Load email transport configuration, get only the required options
+		$config = Kohana::$config->load('email')->as_array();
+		$config = Arr::extract($config, array('driver', 'options'));
+
+		// Extract configured options
+		extract($config, EXTR_SKIP);
+
+		if ($driver === 'smtp')
+		{
+			// Create SMTP transport
+			$transport = Swift_SmtpTransport::newInstance($options['hostname']);
+
+			if (isset($options['port']))
+			{
+				// Set custom port number
+				$transport->setPort($options['port']);
+			}
+
+			if (isset($options['encryption']))
+			{
+				// Set encryption
+				$transport->setEncryption($options['encryption']);
+			}
+
+			if (isset($options['username']))
+			{
+				// Require authentication, username
+				$transport->setUsername($options['username']);
+			}
+
+			if (isset($options['password']))
+			{
+				// Require authentication, password
+				$transport->setPassword($options['password']);
+			}
+
+			if (isset($options['timeout']))
+			{
+				// Use custom timeout setting
+				$transport->setTimeout($options['timeout']);
+			}
+		}
+		elseif ($driver === 'sendmail')
+		{
+			// Create sendmail transport
+			$transport = Swift_SendmailTransport::newInstance();
+
+			if (isset($options['command']))
+			{
+				// Use custom sendmail command
+				$transport->setCommand($options['command']);
+			}
+		}
+		else
+		{
+			// Create native transport
+			$transport = Swift_MailTransport::newInstance();
+
+			if (isset($options['params']))
+			{
+				// Set extra parameters for mail()
+				$transport->setExtraParams($options['params']);
+			}
+		}
+
+		// Create the SwiftMailer instance
+		return Email::$_mailer = Swift_Mailer::newInstance($transport);
 	}
 
 	/**
