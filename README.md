@@ -22,6 +22,17 @@ Additional senders can be added using the `from()` and `reply_to()` methods. If 
 
 To access and modify the [Swiftmailer message](http://swiftmailer.org/docs/messages) directly, use the `raw_message()` method.
 
+### Email Spooling
+
+Email spooling allows you to enqueue emails into a queue instead of sending off the email in realtime. This can be usefull when your SMPT server limits the number of emails you can send over a certian ammount of time.
+
+Currently two types of email spooling drivers are supported.
+
+ * **Database Spooling:** This will enqueue the email into a database table (This driver requires the `Database` module)
+ * **File Spooling:** This will enqueue the email into a file under a specified directory
+
+When you are ready to send emails from the spool you may use `Email::flush_spool($max)` Where `$max` is the maximum number of emails to flush. It is recomended to use a CRON job or some other type of task to empty the spool.
+
 ## Configuration
 
 Configuration is stored in `config/email.php`. Options are dependant upon transport method used. Consult the Swiftmailer documentation for options available to each transport.
