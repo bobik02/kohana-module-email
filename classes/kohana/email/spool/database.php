@@ -68,9 +68,41 @@ class Kohana_Email_Spool_Database extends Swift_ConfigurableSpool {
 			$transport->start();
 		}
 
+		$time = time();
 
+		// Keep a count of how many messages were sent
+		$count = 0;
 
-		var_dump($transport);
+		// Setup the selection query
+		$query = DB::Select()
+			->from($this->_table_name)
+			->order_by('id', 'ASC');
+
+		// Limit the number of emails to dequeue from the spool
+		if ($this->getMessageLimit() !== NULL)
+		{
+			$query->limit($this->getMessageLimit());
+		}
+
+		foreach ($query->execute() as $email_message)
+		{
+			// Get the deserialized message
+			$message = unserialize($email_message['message']);
+
+			// Send the message
+			$count += $transport->send($message, $failed_recipients);
+
+			// Delete the send email from the table
+			DB::Delete($this->_table_name)
+				->where('id', '=', $email_message['id'])
+				->execute();
+
+			// Make sure we haven't reached the time limit
+			if ($this->getTimeLimit() AND (time() - $time) >= $this->getTimeLimit())
+				break;
+		}
+
+		return $count;
 	}
 
 }
