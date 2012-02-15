@@ -14,9 +14,9 @@ class Kohana_Email {
 	const VERSION = '1.0.0';
 
 	/**
-	 * @var  object  SwiftMailer instance
+	 * @var  object  SwiftTransport instance
 	 */
-	public static $_mailer;
+	public static $_transport;
 
 	/**
 	 * @var  object  SwiftMailer spool object instance
@@ -24,15 +24,15 @@ class Kohana_Email {
 	public static $_spooler;
 
 	/**
-	 * Creates a SwiftMailer instance.
+	 * Creates a instance of the swiftmailer transport type
 	 *
-	 * @return  object  Swift object
+	 * @return  object  Swift transport object
 	 */
-	public static function mailer()
+	public static function transport()
 	{
-		if (Email::$_mailer)
+		if (Email::$_transport)
 		{
-			return Email::$_mailer;
+			return Email::$_transport;
 		}
 
 		// Load email transport configuration, get only the required options
@@ -100,8 +100,7 @@ class Kohana_Email {
 			}
 		}
 
-		// Create the SwiftMailer instance
-		return Email::$_mailer = Swift_Mailer::newInstance($transport);
+		return Email::$_mailer = $transport;
 	}
 
 	/**
@@ -435,7 +434,9 @@ class Kohana_Email {
 	 */
 	public function send(array & $failed = NULL)
 	{
-		return Email::mailer()->send($this->_message, $failed);
+		var_dump(Email::mailer());
+
+		//return Email::mailer()->send($this->_message, $failed);
 	}
 
 	/**
