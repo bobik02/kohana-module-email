@@ -185,6 +185,28 @@ class Kohana_Email {
 	}
 
 	/**
+	 * Flush the email spool by sending all mesasges that
+	 * are currently queded in the spool using the configured transport
+	 *
+	 * @param   int    the number of emails to send
+	 * @param   array  failed recipient list, by reference
+	 * @return  int    The number of emails sent
+	 */
+	public static function flush_spool($message_limit = NULL, & $failed_recipients = NULL)
+	{
+		if ( ! $spool = Email::spooler())
+		{
+			throw new Kohana_Exception("The email spooler is currently disabled");
+		}
+
+		// Set the spooler message limit
+		$spool->setMessageLimit($message_limit);
+
+		// Flush the spool
+		return $spool->flushQueue(Email::transport(), $failed_recipients);
+	}
+
+	/**
 	 * Create a new email message.
 	 *
 	 * @param   string  message subject
