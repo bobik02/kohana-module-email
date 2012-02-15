@@ -14,24 +14,27 @@ class Kohana_Email {
 	const VERSION = '1.0.0';
 
 	/**
-	 * @var  object  SwiftTransport instance
+	 * A instance of the configured transport object
+	 * @var  Swift_Transport
 	 */
 	public static $_transport;
 
 	/**
-	 * @var  object  SwiftMailer spool object instance
+	 * A insatnce of the configured SwiftMailer spooling object
+	 * @var  Swift_ConfigurableSpool
 	 */
 	public static $_spooler;
 
 	/**
-	 * @var  Swift_Mailer  SwiftMailer object for sending mail
+	 * SwiftMailer object for sending mail
+	 * @var  Swift_Mailer
 	 */
 	public static $_mailer;
 
 	/**
 	 * Creates a instance of the swiftmailer transport type
 	 *
-	 * @return  object  Swift transport object
+	 * @return  Swift_Transport  Transport object
 	 */
 	public static function transport()
 	{
@@ -116,7 +119,7 @@ class Kohana_Email {
 	/**
 	 * Create a configurable Swift Spooler instance
 	 *
-	 * @return  object  Instance of a SwiftMailer spooler
+	 * @return  Swift_Spool  Instance of a SwiftMailer spooler
 	 */
 	public static function spooler()
 	{
@@ -162,7 +165,7 @@ class Kohana_Email {
 	/**
 	 * Create a instance of the Swift_Mailer object
 	 *
-	 * @return  object  The SwiftMailer object
+	 * @return  Swift_ConfigurableSpool  The SwiftMailer object
 	 */
 	public static function mailer()
 	{
@@ -188,9 +191,9 @@ class Kohana_Email {
 	 * Flush the email spool by sending all mesasges that
 	 * are currently queded in the spool using the configured transport
 	 *
-	 * @param   int    the number of emails to send
-	 * @param   array  failed recipient list, by reference
-	 * @return  int    The number of emails sent
+	 * @param   int    $message_limit      The number of messages to send
+	 * @param   array  $failed_recipients  A list of failed recipients
+	 * @return  int  The number of emails sent
 	 */
 	public static function flush_spool($message_limit = NULL, & $failed_recipients = NULL)
 	{
@@ -209,9 +212,9 @@ class Kohana_Email {
 	/**
 	 * Create a new email message.
 	 *
-	 * @param   string  message subject
-	 * @param   string  message body
-	 * @param   string  body mime type
+	 * @param   string  $subject  message subject
+	 * @param   string  $message  message body
+	 * @param   string  $type     body mime type
 	 * @return  Email
 	 */
 	public static function factory($subject = NULL, $message = NULL, $type = NULL)
@@ -220,16 +223,16 @@ class Kohana_Email {
 	}
 
 	/**
-	 * @var  object  message instance
+	 * @var  Swift_Message  message instance
 	 */
 	protected $_message;
 
 	/**
 	 * Initialize a new Swift_Message, set the subject and body.
 	 *
-	 * @param   string  message subject
-	 * @param   string  message body
-	 * @param   string  body mime type
+	 * @param   string  $subject    message subject
+	 * @param   string  $message    message body
+	 * @param   string  $type body  mime type
 	 * @return  void
 	 */
 	public function __construct($subject = NULL, $message = NULL, $type = NULL)
@@ -253,7 +256,7 @@ class Kohana_Email {
 	/**
 	 * Set the message subject.
 	 *
-	 * @param   string  new subject
+	 * @param   string  $subject  new subject
 	 * @return  Email
 	 */
 	public function subject($subject)
@@ -269,8 +272,8 @@ class Kohana_Email {
 	 * by calling this method multiple times. Every email is required to have
 	 * a "text/plain" message body.
 	 *
-	 * @param   string  new message body
-	 * @param   string  mime type: text/html, etc
+	 * @param   string  $body  new message body
+	 * @param   string  $type  mime type: text/html, etc
 	 * @return  Email
 	 */
 	public function message($body, $type = NULL)
@@ -301,9 +304,9 @@ class Kohana_Email {
 	 *         'jane.doe@domain.com' => 'Jane Doe',
 	 *     ));
 	 *
-	 * @param   mixed    single email address or an array of addresses
-	 * @param   string   full name
-	 * @param   string   recipient type: to, cc, bcc
+	 * @param   mixed   $email  single email address or an array of addresses
+	 * @param   string  $name   full name
+	 * @param   string  $type   recipient type: to, cc, bcc
 	 * @return  Email
 	 */
 	public function to($email, $name = NULL, $type = 'to')
@@ -312,7 +315,7 @@ class Kohana_Email {
 		{
 			foreach ($email as $key => $value)
 			{
-				if (ctype_digit((string) $key))
+				if (ctype_digit( (string) $key))
 				{
 					// Only an email address, no name
 					$this->to($value, NULL, $type);
@@ -336,8 +339,8 @@ class Kohana_Email {
 	/**
 	 * Add a "carbon copy" email recipient.
 	 *
-	 * @param   string   email address
-	 * @param   string   full name
+	 * @param   string  $email  email address
+	 * @param   string  $name   full name
 	 * @return  Email
 	 */
 	public function cc($email, $name = NULL)
@@ -348,8 +351,8 @@ class Kohana_Email {
 	/**
 	 * Add a "blind carbon copy" email recipient.
 	 *
-	 * @param   string   email address
-	 * @param   string   full name
+	 * @param   string  $email  email address
+	 * @param   string  $name   full name
 	 * @return  Email
 	 */
 	public function bcc($email, $name = NULL)
@@ -369,9 +372,9 @@ class Kohana_Email {
 	 *         'jane.doe@domain.com' => 'Jane Doe',
 	 *     ));
 	 *
-	 * @param   mixed    single email address or an array of addresses
-	 * @param   string   full name
-	 * @param   string   sender type: from, replyto
+	 * @param   mixed   $email  single email address or an array of addresses
+	 * @param   string  $name   full name
+	 * @param   string  $type   sender type: from, replyto
 	 * @return  Email
 	 */
 	public function from($email, $name = NULL, $type = 'from')
@@ -380,7 +383,7 @@ class Kohana_Email {
 		{
 			foreach ($email as $key => $value)
 			{
-				if (ctype_digit((string) $key))
+				if (ctype_digit( (string) $key))
 				{
 					// Only an email address, no name
 					$this->from($value, NULL, $type);
@@ -404,8 +407,8 @@ class Kohana_Email {
 	/**
 	 * Add "reply to" email sender.
 	 *
-	 * @param   string   email address
-	 * @param   string   full name
+	 * @param   string  $email  email address
+	 * @param   string  $name   full name
 	 * @return  Email
 	 */
 	public function reply_to($email, $name = NULL)
@@ -418,8 +421,8 @@ class Kohana_Email {
 	 *
 	 * [!!] This must be set when defining multiple "from" addresses!
 	 *
-	 * @param   string   email address
-	 * @param   string   full name
+	 * @param   string  $email  email address
+	 * @param   string  $name   full name
 	 * @return  Email
 	 */
 	public function sender($email, $name = NULL)
@@ -432,7 +435,7 @@ class Kohana_Email {
 	/**
 	 * Set the return path for bounce messages.
 	 *
-	 * @param   string  email address
+	 * @param   string  $email  email address
 	 * @return  Email
 	 */
 	public function return_path($email)
@@ -455,7 +458,7 @@ class Kohana_Email {
 	/**
 	 * Attach a file.
 	 *
-	 * @param   string  file path
+	 * @param   string  $path  file path
 	 * @return  Email
 	 */
 	public function attach_file($path)
@@ -468,9 +471,9 @@ class Kohana_Email {
 	/**
 	 * Attach content to be sent as a file.
 	 *
-	 * @param   binary  file contents
-	 * @param   string  file name
-	 * @param   string  mime type
+	 * @param   binary  $data  file contents
+	 * @param   string  $file  file name
+	 * @param   string  $mime  mime type
 	 * @return  Email
 	 */
 	public function attach_content($data, $file, $mime = NULL)
@@ -491,8 +494,8 @@ class Kohana_Email {
 	 *
 	 * !! Failed recipients can be collected by using the second parameter.
 	 *
-	 * @param   array    failed recipient list, by reference
-	 * @return  integer  number of emails sent
+	 * @param   array  $failed  failed recipient list, by reference
+	 * @return  int  number of emails sent
 	 */
 	public function send(array & $failed = NULL)
 	{
@@ -504,8 +507,9 @@ class Kohana_Email {
 	 *
 	 * !! Failed recipients can be collected by using the second parameter.
 	 *
-	 * @param   array    failed recipient list, by reference
-	 * @return  integer  number of emails sent
+	 * @param   array  $to      a list of addresses to send to
+	 * @param   array  $failed  failed recipient list, by reference
+	 * @return  int  number of emails sent
 	 */
 	public function batch(array $to, array & $failed = NULL)
 	{
@@ -520,7 +524,7 @@ class Kohana_Email {
 
 		foreach ($to as $email => $name)
 		{
-			if (ctype_digit((string) $email))
+			if (ctype_digit( (string) $email))
 			{
 				// Only an email address was provided
 				$email = $name;
