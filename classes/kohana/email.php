@@ -24,6 +24,11 @@ class Kohana_Email {
 	public static $_spooler;
 
 	/**
+	 * @var  Swift_Mailer  SwiftMailer object for sending mail
+	 */
+	public static $_mailer;
+
+	/**
 	 * Creates a instance of the swiftmailer transport type
 	 *
 	 * @return  object  Swift transport object
@@ -109,7 +114,7 @@ class Kohana_Email {
 	}
 
 	/**
-	 * Create a Swift Spooler instance
+	 * Create a configurable Swift Spooler instance
 	 *
 	 * @return  object  Instance of a SwiftMailer spooler
 	 */
@@ -130,6 +135,7 @@ class Kohana_Email {
 		// Use the file spooler driver
 		if ($spool_driver === 'file')
 		{
+			// Make sure the spooling directory is writable
 			if ( ! is_writable($spool_options))
 			{
 				throw new Kohana_Exception("The file email spooling path must be writable");
@@ -151,6 +157,31 @@ class Kohana_Email {
 		}
 
 		return Email::$_spooler = $spooler;
+	}
+
+	/**
+	 * Create a instance of the Swift_Mailer object
+	 *
+	 * @return  object  The SwiftMailer object
+	 */
+	public static function mailer()
+	{
+		if (Email::$_mailer)
+		{
+			return Email::$_mailer;
+		}
+
+		// Get the transport setup through configuration
+		$transport = Email::transport();
+
+		// Create a spooler transport object using
+		if ($spooler = Email::spooler())
+		{
+			// Setup the transport using the spooler
+			$transport = Swift_SpoolTransport::newInstance($spooler);
+		}
+
+		return Email::$_mailer = Swift_Mailer::newInstance($transport);
 	}
 
 	/**
@@ -182,8 +213,7 @@ class Kohana_Email {
 	public function __construct($subject = NULL, $message = NULL, $type = NULL)
 	{
 		// Create a new message, match internal character set
-		$this->_message = Swift_Message::newInstance()
-			;
+		$this->_message = Swift_Message::newInstance();
 
 		if ($subject)
 		{
@@ -444,9 +474,7 @@ class Kohana_Email {
 	 */
 	public function send(array & $failed = NULL)
 	{
-		var_dump(Email::mailer());
-
-		//return Email::mailer()->send($this->_message, $failed);
+		return Email::mailer()->send($this->_message, $failed);
 	}
 
 	/**
