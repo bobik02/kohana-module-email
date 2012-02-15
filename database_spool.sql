@@ -1,0 +1,4 @@
+CREATE  TABLE IF NOT EXISTS `email_spool` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `message` BLOB NULL ,
+  PRIMARY KEY (`id`) )
